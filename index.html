@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title>周刊 / 年刊 算分器</title>
+<style>
+html,body{margin:0;padding:0;background:#0a0c10;}
+body{padding:max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom));}
+#kanscore-root{max-width:1080px;margin:0 auto;}
+@media (max-width:420px){
+  #kanscore-root{padding:14px;border-radius:14px;}
+  #kanscore-root .ks-total{font-size:38px;}
+  #kanscore-root .ks-row{grid-template-columns:10px 1fr auto 44px auto;font-size:12px;gap:7px;}
+}
+</style>
+</head>
+<body><div id="kanscore-root">
+<style>
+#kanscore-root{
+  --bg:#0a0c10; --card:#11151d; --card2:#0e1219; --line:rgba(255,255,255,.075);
+  --txt:#e8ebf2; --mut:#8d95a8; --play:#8b5cf6; --inter:#22d3ee;
+  --fav:#f59e0b; --coin:#34d399; --like:#fb7185;
+  font-family:"Segoe UI",system-ui,-apple-system,"Microsoft YaHei",sans-serif;
+  color:var(--txt); background:var(--bg); padding:18px; border-radius:18px;
+  box-sizing:border-box; -webkit-font-smoothing:antialiased;
+}
+#kanscore-root *{box-sizing:border-box;}
+#kanscore-root .ks-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;}
+#kanscore-root .ks-h1{font-size:19px;font-weight:650;letter-spacing:-0.01em;}
+#kanscore-root .ks-sub{font-size:12px;color:var(--mut);margin-top:3px;}
+#kanscore-root .ks-seg{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:3px;}
+#kanscore-root .ks-seg button{
+  appearance:none;border:0;background:transparent;color:var(--mut);font:inherit;font-size:13px;
+  padding:7px 18px;border-radius:999px;cursor:pointer;transition:color .18s,background .18s;
+}
+#kanscore-root .ks-seg button:hover{color:var(--txt);}
+#kanscore-root .ks-seg button.on{background:#222a3a;color:#fff;box-shadow:0 1px 0 rgba(255,255,255,.06) inset;}
+#kanscore-root .ks-grid{display:grid;grid-template-columns:minmax(280px,340px) 1fr;gap:14px;}
+#kanscore-root .ks-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;}
+#kanscore-root .ks-cap{font-size:11px;letter-spacing:.14em;color:var(--mut);font-weight:600;text-transform:uppercase;}
+#kanscore-root .ks-hint{font-size:11px;letter-spacing:0;text-transform:none;color:#5f6779;margin-left:8px;font-weight:400;}
+#kanscore-root .ks-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+#kanscore-root .ks-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mut);}
+#kanscore-root .ks-fields input{
+  width:100%;background:var(--card2);border:1px solid var(--line);border-radius:9px;
+  color:var(--txt);font:inherit;font-size:14px;padding:8px 10px;font-variant-numeric:tabular-nums;
+  transition:border-color .15s,box-shadow .15s;
+}
+#kanscore-root .ks-fields input:focus{outline:none;border-color:#4c5a7a;box-shadow:0 0 0 3px rgba(124,92,255,.16);}
+#kanscore-root .ks-derived{display:flex;gap:16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:12px;color:var(--mut);}
+#kanscore-root .ks-derived b{color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums;}
+#kanscore-root .ks-total{font-size:46px;font-weight:700;letter-spacing:-0.03em;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums;}
+#kanscore-root .ks-bar{display:flex;height:10px;border-radius:999px;overflow:hidden;background:#1a2030;margin:14px 0 12px;gap:2px;}
+#kanscore-root .ks-bar span{display:block;height:100%;transition:width .28s ease;}
+#kanscore-root .ks-rows{display:flex;flex-direction:column;gap:2px;}
+#kanscore-root .ks-row{display:grid;grid-template-columns:10px 1fr auto 56px auto;align-items:center;gap:10px;padding:6px 0;font-size:13px;}
+#kanscore-root .ks-row i{width:8px;height:8px;border-radius:2px;background:var(--c);display:block;}
+#kanscore-root .ks-name{color:#c6ccdb;}
+#kanscore-root .ks-val{font-variant-numeric:tabular-nums;color:var(--txt);font-weight:600;}
+#kanscore-root .ks-pct{font-size:11px;color:var(--mut);text-align:right;font-variant-numeric:tabular-nums;}
+#kanscore-root .ks-chip{
+  font-size:11px;color:#9aa4bb;background:var(--card2);border:1px solid var(--line);
+  border-radius:6px;padding:2px 7px;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#kanscore-root .ks-chip.cap{color:#f0b25a;border-color:rgba(240,178,90,.28);background:rgba(240,178,90,.08);}
+#kanscore-root .ks-margin{margin-top:14px;}
+#kanscore-root .ks-margin-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px;}
+#kanscore-root .ks-m{background:var(--card2);border:1px solid var(--line);border-radius:11px;padding:10px;}
+#kanscore-root .ks-m .l{font-size:11px;color:var(--mut);white-space:nowrap;}
+#kanscore-root .ks-m .v{font-size:15px;font-weight:650;margin-top:5px;font-variant-numeric:tabular-nums;color:#dfe5f2;}
+#kanscore-root .ks-m .track{height:4px;background:#1a2030;border-radius:999px;margin-top:8px;overflow:hidden;}
+#kanscore-root .ks-m .fill{height:100%;background:linear-gradient(90deg,#5b6cff,#9a7bff);border-radius:999px;transition:width .28s ease;}
+@media (max-width:760px){
+  #kanscore-root .ks-grid{grid-template-columns:1fr;}
+  #kanscore-root .ks-margin-grid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+
+<div class="ks-head">
+  <div>
+    <div class="ks-h1">周刊 / 年刊 算分器</div>
+    <div class="ks-sub">改一个数字，看排名分怎么变</div>
+  </div>
+  <div class="ks-seg" id="ks-mode">
+    <button type="button" data-mode="weekly" class="on">周刊</button>
+    <button type="button" data-mode="annual">年刊</button>
+  </div>
+</div>
+
+<div class="ks-grid">
+  <section class="ks-card">
+    <div class="ks-cap">数据输入</div>
+    <div class="ks-fields">
+      <label>播放<input id="ks-j" type="number" min="0" step="100" value="3000"></label>
+      <label>评论<input id="ks-p" type="number" min="0" step="1" value="200"></label>
+      <label>弹幕<input id="ks-dan" type="number" min="0" step="1" value="500"></label>
+      <label>点赞<input id="ks-d" type="number" min="0" step="10" value="3000"></label>
+      <label>投币<input id="ks-b" type="number" min="0" step="1" value="800"></label>
+      <label>收藏<input id="ks-s" type="number" min="0" step="1" value="1200"></label>
+    </div>
+    <div class="ks-derived">
+      <span>有效播放 <b id="ks-jd">3,000</b></span>
+      <span>互动量 <b id="ks-pd">700</b></span>
+    </div>
+  </section>
+
+  <section class="ks-card">
+    <div class="ks-cap">总得分</div>
+    <div class="ks-total" id="ks-total">0</div>
+    <div class="ks-bar" id="ks-bar"></div>
+    <div class="ks-rows" id="ks-rows"></div>
+  </section>
+</div>
+
+<section class="ks-card ks-margin">
+  <div class="ks-cap">边际收益<span class="ks-hint">按当前数据，每多一档能加多少分</span></div>
+  <div class="ks-margin-grid" id="ks-margin"></div>
+</section>
+
+<script>
+(function(){
+  var root = document.getElementById('kanscore-root');
+  if (!root) return;
+
+  function pyRound(x){
+    if (!isFinite(x)) return 0;
+    var f = Math.floor(x), diff = x - f;
+    if (diff > 0.5) return f + 1;
+    if (diff < 0.5) return f;
+    return (f % 2 === 0) ? f : f + 1;
+  }
+  function r2(x){ return isFinite(x) ? Number(x.toFixed(2)) : 0; }
+
+  function weekly(v){
+    var j=v.j,p=v.p,dan=v.dan,d=v.d,b=v.b,s=v.s;
+    var jd = j > 10000 ? j*0.5 + 5000 : j;
+    var pd = p + dan;
+    var denom = jd + s + pd*20;
+    var xa = denom > 0 ? r2(Math.pow((jd+s)/denom, 2)) : 0;
+    var xb = (s > b*2) ? ((j*s) > 0 ? (b*b/(j*s))*1000 : 0) : (j > 0 ? (s/j)*250 : 0);
+    xb = Math.min(50, r2(xb));
+    var xc = (b > s) ? ((j*b) > 0 ? (s*s/(j*b))*250 : 0) : (j > 0 ? (b/j)*250 : 0);
+    xc = Math.min(50, r2(xc));
+    var xd = j > 0 ? r2((Math.min(b,s)/j)*25) : 0;
+    xd = Math.min(1, xd);
+    var parts = [r2(jd*xd), r2(pd*xa*15), r2(s*xb), r2(b*xc), Math.min(d, b*2)];
+    return {jd:jd, pd:pd, xa:xa, xb:xb, xc:xc, xd:xd, parts:parts,
+            total:pyRound(parts.reduce(function(a,c){return a+c;},0))};
+  }
+
+  function annual(v){
+    var j=v.j,p=v.p,dan=v.dan,d=v.d,b=v.b,s=v.s;
+    var jd = j > 300000 ? j*0.5 + 150000 : j;
+    var pd = p + dan;
+    var denom = jd + s + pd*50;
+    var xa = denom > 0 ? r2(Math.pow((jd+s)/denom, 2) * 30) : 0;
+    var xb = r2(s > b*2 ? (s > 0 ? (b/s)*40 : 0) : 20);
+    var xc = r2(b > s ? (b > 0 ? (s/b)*20 : 20) : 20);
+    var parts = [jd, pd*xa, s*xb, b*xc, Math.min(d, b*2)];
+    return {jd:jd, pd:pd, xa:xa, xb:xb, xc:xc, xd:null, parts:parts,
+            total:pyRound(parts.reduce(function(a,c){return a+c;},0))};
+  }
+
+  var fmt = new Intl.NumberFormat('zh-CN', {maximumFractionDigits:0});
+  var fmt2 = new Intl.NumberFormat('zh-CN', {maximumFractionDigits:2});
+  var nf = function(n){ return fmt.format(Math.round(n)); };
+
+  var META = [
+    {key:'play',  name:'播放', color:'var(--play)'},
+    {key:'inter', name:'互动', color:'var(--inter)'},
+    {key:'fav',   name:'收藏', color:'var(--fav)'},
+    {key:'coin',  name:'硬币', color:'var(--coin)'},
+    {key:'like',  name:'点赞', color:'var(--like)'}
+  ];
+
+  var inputs = {
+    j: root.querySelector('#ks-j'), p: root.querySelector('#ks-p'), dan: root.querySelector('#ks-dan'),
+    d: root.querySelector('#ks-d'), b: root.querySelector('#ks-b'), s: root.querySelector('#ks-s')
+  };
+  var modeBtns = Array.prototype.slice.call(root.querySelectorAll('#ks-mode button'));
+  var mode = 'weekly';
+
+  function read(){
+    var o = {};
+    Object.keys(inputs).forEach(function(k){
+      var v = parseInt(inputs[k].value, 10);
+      o[k] = isFinite(v) && v > 0 ? v : 0;
+    });
+    return o;
+  }
+
+  function compute(v){ return mode === 'weekly' ? weekly(v) : annual(v); }
+
+  function chipText(idx, r){
+    if (mode === 'weekly'){
+      if (idx === 0) return 'D ' + (r.xd >= 1 ? '封顶' : '×' + fmt2.format(r.xd));
+      if (idx === 1) return 'A ×' + fmt2.format(r.xa);
+      if (idx === 2) return 'B ×' + fmt2.format(r.xb) + (r.xb >= 50 ? ' 封顶' : '');
+      if (idx === 3) return 'C ×' + fmt2.format(r.xc) + (r.xc >= 50 ? ' 封顶' : '');
+      return '≤ 2×投币';
+    }
+    if (idx === 0) return 'D —';
+    if (idx === 1) return 'A ×' + fmt2.format(r.xa);
+    if (idx === 2) return 'B ×' + fmt2.format(r.xb);
+    if (idx === 3) return 'C ×' + fmt2.format(r.xc);
+    return '≤ 2×投币';
+  }
+  function chipTitle(idx){
+    if (mode !== 'weekly') return '';
+    if (idx === 0) return '播放得点 = 基础播放得点 × 修正D ｜ 修正D = min(硬币, 收藏) ÷ 播放 × 25，最大 1';
+    if (idx === 1) return '互动得点 = (评论 + 弹幕) × 修正A × 15 ｜ 修正A = ((基础播放 + 收藏) ÷ (基础播放 + 收藏 + 互动量 × 20))²';
+    if (idx === 2) return '收藏得点 = 收藏 × 修正B ｜ 收藏 > 硬币×2：修正B = 硬币² ÷ (播放 × 收藏) × 1000；否则 = 收藏 ÷ 播放 × 250，最大 50';
+    if (idx === 3) return '硬币得点 = 硬币 × 修正C ｜ 硬币 > 收藏：修正C = 收藏² ÷ (播放 × 硬币) × 250；否则 = 硬币 ÷ 播放 × 250，最大 50';
+    return '点赞得点 = min(点赞, 硬币 × 2)';
+  }
+  function isCap(idx, r){
+    if (mode !== 'weekly') return false;
+    if (idx === 0) return r.xd >= 1;
+    if (idx === 2) return r.xb >= 50;
+    if (idx === 3) return r.xc >= 50;
+    return false;
+  }
+
+  function render(){
+    var v = read();
+    var r = compute(v);
+    var total = r.total;
+
+    root.querySelector('#ks-total').textContent = fmt.format(total);
+    root.querySelector('#ks-jd').textContent = nf(r.jd);
+    root.querySelector('#ks-pd').textContent = nf(r.pd);
+
+    var bar = root.querySelector('#ks-bar');
+    bar.innerHTML = '';
+    META.forEach(function(m, i){
+      var val = Math.max(0, r.parts[i] || 0);
+      var pct = total > 0 ? (val / total * 100) : 0;
+      if (pct <= 0) return;
+      var seg = document.createElement('span');
+      seg.style.width = pct.toFixed(2) + '%';
+      seg.style.background = m.color;
+      seg.title = m.name + ' ' + nf(val);
+      bar.appendChild(seg);
+    });
+
+    var rows = root.querySelector('#ks-rows');
+    rows.innerHTML = '';
+    META.forEach(function(m, i){
+      var val = Math.max(0, r.parts[i] || 0);
+      var pct = total > 0 ? (val / total * 100) : 0;
+      var row = document.createElement('div');
+      row.className = 'ks-row';
+
+      var dot = document.createElement('i');
+      dot.style.setProperty('--c', m.color);
+
+      var name = document.createElement('span');
+      name.className = 'ks-name';
+      name.textContent = m.name;
+
+      var valEl = document.createElement('span');
+      valEl.className = 'ks-val';
+      valEl.textContent = fmt2.format(val);
+
+      var pctEl = document.createElement('span');
+      pctEl.className = 'ks-pct';
+      pctEl.textContent = pct.toFixed(1) + '%';
+
+      var chip = document.createElement('span');
+      chip.className = 'ks-chip' + (isCap(i, r) ? ' cap' : '');
+      chip.textContent = chipText(i, r);
+      chip.title = chipTitle(i);
+
+      row.appendChild(dot); row.appendChild(name); row.appendChild(valEl);
+      row.appendChild(pctEl); row.appendChild(chip);
+      rows.appendChild(row);
+    });
+
+    var steps = [
+      {label:'+1,000 播放', apply:function(x){ x.j += 1000; }},
+      {label:'+10 评论',    apply:function(x){ x.p += 10; }},
+      {label:'+10 弹幕',    apply:function(x){ x.dan += 10; }},
+      {label:'+100 点赞',   apply:function(x){ x.d += 100; }},
+      {label:'+10 投币',    apply:function(x){ x.b += 10; }},
+      {label:'+10 收藏',    apply:function(x){ x.s += 10; }}
+    ];
+    var deltas = steps.map(function(st){
+      var copy = {j:v.j,p:v.p,dan:v.dan,d:v.d,b:v.b,s:v.s};
+      st.apply(copy);
+      var nv = compute(copy).total;
+      return {label: st.label, delta: nv - total};
+    });
+    var maxD = Math.max.apply(null, deltas.map(function(x){ return Math.abs(x.delta); }).concat([1]));
+
+    var mg = root.querySelector('#ks-margin');
+    mg.innerHTML = '';
+    deltas.forEach(function(x){
+      var card = document.createElement('div');
+      card.className = 'ks-m';
+      var l = document.createElement('div'); l.className = 'l'; l.textContent = x.label;
+      var val = document.createElement('div'); val.className = 'v';
+      val.textContent = (x.delta >= 0 ? '+' : '') + fmt.format(x.delta);
+      var track = document.createElement('div'); track.className = 'track';
+      var fill = document.createElement('div'); fill.className = 'fill';
+      fill.style.width = Math.max(0, Math.abs(x.delta) / maxD * 100).toFixed(1) + '%';
+      track.appendChild(fill);
+      card.appendChild(l); card.appendChild(val); card.appendChild(track);
+      mg.appendChild(card);
+    });
+  }
+
+  modeBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      mode = btn.getAttribute('data-mode');
+      modeBtns.forEach(function(b){ b.classList.toggle('on', b === btn); });
+      render();
+    });
+  });
+  Object.keys(inputs).forEach(function(k){
+    inputs[k].addEventListener('input', render);
+    inputs[k].addEventListener('change', render);
+  });
+  render();
+})();
+</script>
+</div>
+</body>
+</html>
